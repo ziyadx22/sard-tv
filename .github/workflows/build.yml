@@ -18,13 +18,8 @@ jobs:
           cd mysard_tv
           sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 21/g' android/app/build.gradle.kts || true
           sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 21/g' android/app/build.gradle || true
-          python3 -c '
-          p = "android/app/src/main/AndroidManifest.xml"
-          s = open(p).read()
-          perms = "<uses-permission android:name=\"android.permission.INTERNET\"/>\n    <uses-permission android:name=\"android.permission.SYSTEM_ALERT_WINDOW\"/>\n    "
-          open(p, "w").write(s.replace("<application", perms + "<application", 1))
-          '
-          flutter pub add http google_fonts flutter_overlay_window
+          sed -i 's/<application/<uses-permission android:name="android.permission.INTERNET"\/>\n    <application/' android/app/src/main/AndroidManifest.xml
+          flutter pub add http google_fonts
           cp ../main.dart lib/main.dart
       - name: Build Universal APK
         run: |
