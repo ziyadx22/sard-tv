@@ -1,5 +1,7 @@
 name: Build MySard TV APK
 on: [push, workflow_dispatch]
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -16,13 +18,16 @@ jobs:
         run: |
           flutter create --platforms=android --org=com.ziyad.mysard mysard_tv
           cd mysard_tv
+          sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 21/g' android/app/build.gradle.kts || true
+          sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 21/g' android/app/build.gradle || true
           flutter pub add http google_fonts qr_flutter
-          if [ -f ../main.dart ]; then cp ../main.dart lib/main.dart; fi
-      - name: Build APK
+          cp ../main.dart lib/main.dart
+      - name: Build Universal APK
         run: |
           cd mysard_tv
-          flutter build apk --release
-      - uses: actions/upload-artifact@v4
+          flutter build apk --release --target-platform android-arm,android-arm64
+      - name: Publish Direct Link
+        uses: softprops/action-gh-release@v2
         with:
-          name: MySard-TV-APK
-          path: mysard_tv/build/app/outputs/flutter-apk/app-release.apk
+          tag_name: v1.0
+          files: mysard_tv/build/app/outputs/flutter-apk/app-release.apk
