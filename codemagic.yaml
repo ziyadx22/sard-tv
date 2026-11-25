@@ -9,11 +9,13 @@ workflows:
           set -e
           flutter create --platforms=ios --org=com.ziyad.mysard mysard_ios
           cd mysard_ios
-          flutter pub add http mobile_scanner speech_to_text translator
+          flutter pub add web_socket_channel mobile_scanner google_mlkit_text_recognition camera speech_to_text translator url_launcher
           cp ../ios_app.dart lib/main.dart
-          /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'نحتاج الكاميرا لمسح باركود التلفزيون'" ios/Runner/Info.plist
-          /usr/libexec/PlistBuddy -c "Add :NSMicrophoneUsageDescription string 'نحتاج المايكروفون لسماع الصوت وترجمته للتلفزيون'" ios/Runner/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'نحتاج الكاميرا لمسح باركود التلفزيون وقراءة الترجمة الإنجليزية من الشاشة'" ios/Runner/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :NSMicrophoneUsageDescription string 'نحتاج المايكروفون لسماع صوت اللعبة وترجمته للتلفزيون'" ios/Runner/Info.plist
           /usr/libexec/PlistBuddy -c "Add :NSSpeechRecognitionUsageDescription string 'نحتاج التعرف على الكلام للترجمة الفورية'" ios/Runner/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :LSApplicationQueriesSchemes array" ios/Runner/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :LSApplicationQueriesSchemes:0 string 'psremoteplay'" ios/Runner/Info.plist
           flutter build ios --release --no-codesign --config-only
           cd ios
           pod install
