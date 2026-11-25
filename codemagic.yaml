@@ -16,7 +16,8 @@ workflows:
           /usr/libexec/PlistBuddy -c "Add :NSSpeechRecognitionUsageDescription string 'نحتاج التعرف على الكلام للترجمة الفورية'" ios/Runner/Info.plist
           flutter build ios --release --no-codesign --config-only
           cd ios
-          xcodebuild -project Runner.xcodeproj -scheme Runner -configuration Release -sdk iphoneos build CODE_SIGN_IDENTITY="" CODE_SIGN_REQUIRED=NO CODE_SIGN_ALLOWED=NO CONFIGURATION_BUILD_DIR=build_out
+          pod install
+          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -sdk iphoneos build CODE_SIGN_IDENTITY="" CODE_SIGN_REQUIRED=NO CODE_SIGN_ALLOWED=NO CONFIGURATION_BUILD_DIR=build_out
           mkdir -p ../../Payload
           cp -r build_out/Runner.app ../../Payload/
           cd ../..
