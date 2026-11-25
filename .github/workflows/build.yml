@@ -14,10 +14,13 @@ jobs:
         run: |
           flutter create --platforms=android --org=com.ziyad.mysard mysard_tv
           cd mysard_tv
-          flutter pub add qr_flutter google_fonts flutter_overlay_window
+          flutter pub add qr_flutter google_fonts
           cp ../main.dart lib/main.dart
-          sed -i 's/<application/<uses-permission android:name="android.permission.INTERNET"\/><uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"\/><uses-permission android:name="android.permission.FOREGROUND_SERVICE"\/><uses-feature android:name="android.software.leanback" android:required="false"\/><uses-feature android:name="android.hardware.touchscreen" android:required="false"\/><application android:banner="@mipmap\/ic_launcher" android:label="MySard TV"/g' android/app/src/main/AndroidManifest.xml
+          mkdir -p android/app/src/main/res/drawable
+          python3 -c "import zlib, struct; w,h=320,180; raw=b''.join(b'\x00'+b'\x0c\x1d\x36\xff'*w for _ in range(h)); chk=lambda t,d: struct.pack('!I',len(d))+t+d+struct.pack('!I',zlib.crc32(t+d)&0xffffffff); open('android/app/src/main/res/drawable/tv_banner.png','wb').write(b'\x89PNG\r\n\x1a\n'+chk(b'IHDR',struct.pack('!IIBBBBB',w,h,8,6,0,0,0))+chk(b'IDAT',zlib.compress(raw))+chk(b'IEND',b''))"
+          sed -i 's/<application/<uses-permission android:name="android.permission.INTERNET"\/><uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"\/><uses-feature android:name="android.software.leanback" android:required="false"\/><uses-feature android:name="android.hardware.touchscreen" android:required="false"\/><application android:banner="@drawable\/tv_banner" android:label="MySard TV"/g' android/app/src/main/AndroidManifest.xml
           sed -i 's/<category android:name="android.intent.category.LAUNCHER"\/>/<category android:name="android.intent.category.LAUNCHER"\/><category android:name="android.intent.category.LEANBACK_LAUNCHER"\/>/g' android/app/src/main/AndroidManifest.xml
+          cp ../MainActivity.kt android/app/src/main/kotlin/com/ziyad/mysard/mysard_tv/MainActivity.kt
           flutter build apk --release
       - name: Publish APK
         uses: softprops/action-gh-release@v2
