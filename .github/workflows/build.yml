@@ -14,18 +14,10 @@ jobs:
         run: |
           flutter create --platforms=android --org=com.ziyad.mysard mysard_tv
           cd mysard_tv
-          flutter pub add http google_fonts
+          flutter pub add qr_flutter google_fonts flutter_overlay_window
           cp ../main.dart lib/main.dart
-          python3 -c '
-          p = "android/app/src/main/AndroidManifest.xml"
-          s = open(p).read()
-          perms = """<uses-permission android:name="android.permission.INTERNET"/>
-          <uses-feature android:name="android.software.leanback" android:required="false"/>
-          <uses-feature android:name="android.hardware.touchscreen" android:required="false"/>"""
-          s = s.replace("<application", perms + "\n    <application android:banner=\"@mipmap/ic_launcher\" android:label=\"MySard TV\"")
-          s = s.replace("<category android:name=\"android.intent.category.LAUNCHER\"/>", "<category android:name=\"android.intent.category.LAUNCHER\"/><category android:name=\"android.intent.category.LEANBACK_LAUNCHER\"/>")
-          open(p, "w").write(s)
-          '
+          sed -i 's/<application/<uses-permission android:name="android.permission.INTERNET"\/><uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"\/><uses-permission android:name="android.permission.FOREGROUND_SERVICE"\/><uses-feature android:name="android.software.leanback" android:required="false"\/><uses-feature android:name="android.hardware.touchscreen" android:required="false"\/><application android:banner="@mipmap\/ic_launcher" android:label="MySard TV"/g' android/app/src/main/AndroidManifest.xml
+          sed -i 's/<category android:name="android.intent.category.LAUNCHER"\/>/<category android:name="android.intent.category.LAUNCHER"\/><category android:name="android.intent.category.LEANBACK_LAUNCHER"\/>/g' android/app/src/main/AndroidManifest.xml
           flutter build apk --release
       - name: Publish APK
         uses: softprops/action-gh-release@v2
