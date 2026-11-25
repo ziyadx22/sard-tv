@@ -206,7 +206,6 @@ class _TVScreenState extends State<TVScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 40),
                   child: Row(
                     children: [
-                      // القسم الأيمن: التعليمات وبيانات الربط
                       Expanded(
                         flex: 5,
                         child: Column(
@@ -236,3 +235,4 @@ class _TVScreenState extends State<TVScreen> {
                             const SizedBox(height: 8),
                             Text("امسح الباركود بكاميرا تطبيق الآيفون أو أدخل البيانات يدوياً:", style: GoogleFonts.cairo(fontSize: 20, color: Colors.white70)),
                             const SizedBox(height: 28),
+                            Container(
