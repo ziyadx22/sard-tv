@@ -13,8 +13,7 @@ workflows:
           cp ../ios_app.dart lib/main.dart
           flutter build ios --release --no-codesign --config-only
           cd ios
-          pod install
-          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -sdk iphoneos build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO CONFIGURATION_BUILD_DIR=build_out
+          xcodebuild -project Runner.xcodeproj -scheme Runner -configuration Release -sdk iphoneos build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO CONFIGURATION_BUILD_DIR=build_out
           mkdir -p ../../Payload
           cp -r build_out/Runner.app ../../Payload/
           cd ../..
