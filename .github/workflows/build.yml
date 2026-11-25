@@ -1,7 +1,5 @@
 name: Build MySard TV APK
 on: [push, workflow_dispatch]
-permissions:
-  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -20,7 +18,8 @@ jobs:
           cd mysard_tv
           sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 21/g' android/app/build.gradle.kts || true
           sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 21/g' android/app/build.gradle || true
-          flutter pub add http google_fonts qr_flutter
+          sed -i 's/<application/<uses-permission android:name="android.permission.INTERNET"\/>\n    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"\/>\n    <application/' android/app/src/main/AndroidManifest.xml
+          flutter pub add http google_fonts flutter_overlay_window
           cp ../main.dart lib/main.dart
       - name: Build Universal APK
         run: |
@@ -28,6 +27,8 @@ jobs:
           flutter build apk --release --target-platform android-arm,android-arm64
       - name: Publish Direct Link
         uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: v1.0
           files: mysard_tv/build/app/outputs/flutter-apk/app-release.apk
