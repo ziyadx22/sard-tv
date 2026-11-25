@@ -6,13 +6,14 @@ workflows:
     scripts:
       - name: Prepare & Build Unsigned IPA
         script: |
+          set -e
           flutter create --platforms=ios --org=com.ziyad.mysard mysard_ios
           cd mysard_ios
           flutter pub add http
           cp ../ios_app.dart lib/main.dart
           flutter build ios --release --no-codesign
           mkdir -p Payload
-          cp -r build/ios/iphoneos/Runner.app Payload/
+          cp -r build/ios/Release-iphoneos/Runner.app Payload/
           zip -r ../MySard_iOS.ipa Payload
     artifacts:
       - MySard_iOS.ipa
