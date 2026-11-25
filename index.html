@@ -3,87 +3,81 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>MySard Remote</title>
 <link href="https://googleapis.com" rel="stylesheet">
 <style>
   body { background:#0b0e17; color:#fff; font-family:'Cairo',sans-serif; margin:0; padding:20px; }
   .card { background:#151a28; border-radius:20px; padding:18px; margin-bottom:16px; border:1px solid #262f45; }
   h2 { margin:0 0 12px; color:#3b82f6; font-size:20px; text-align:center; }
-  input[type="number"], input[type="text"] { width:100%; padding:14px; border-radius:12px; border:1px solid #334155; background:#0f131f; color:#fff; font-size:18px; text-align:center; box-sizing:border-box; font-family:'Cairo'; }
-  button { width:100%; padding:14px; border-radius:12px; border:none; background:#2563eb; color:#fff; font-size:18px; font-weight:800; margin-top:10px; cursor:pointer; font-family:'Cairo'; }
+  input[type="text"] { width:100%; padding:14px; border-radius:12px; border:1px solid #334155; background:#0f131f; color:#fff; font-size:18px; text-align:center; box-sizing:border-box; font-family:'Cairo'; }
+  button { width:100%; padding:14px; border-radius:12px; border:none; background:#16a34a; color:#fff; font-size:18px; font-weight:800; margin-top:10px; cursor:pointer; font-family:'Cairo'; }
   label { display:flex; justify-content:space-between; margin:12px 0 6px; font-size:15px; color:#cbd5e1; }
   input[type="range"] { width:100%; accent-color:#3b82f6; }
-  .colors { display:flex; gap:10px; justify-content:center; margin-top:10px; }
-  .c-btn { width:38px; height:38px; border-radius:50%; border:2px solid #fff; cursor:pointer; }
+  .colors { display:flex; gap:12px; justify-content:center; margin-top:10px; }
+  .c-btn { width:40px; height:40px; border-radius:50%; border:2px solid #fff; cursor:pointer; }
+  #status { text-align:center; color:#4ade80; font-size:14px; margin-top:8px; }
 </style>
 </head>
 <body>
 
-<div class="card" id="pairBox">
-  <h2>🔗 ربط مع شاشة التلفزيون</h2>
-  <input type="number" id="pinInput" placeholder="أدخل رمز الشاشة (مثلاً 2971)">
-  <button onclick="connectTV()">اتصال بالتلفزيون</button>
+<div class="card">
+  <h2>💬 التحكم المباشر بالشاشة (1122)</h2>
+  <input type="text" id="subText" placeholder="اكتب أي جملة هنا..." oninput="sendUpdate()">
+  <button onclick="sendUpdate()">إرسال النص الآن</button>
+  <div id="status">جاهز للإرسال</div>
 </div>
 
-<div id="controls" style="display:none;">
-  <div class="card">
-    <h2>💬 إرسال ترجمة فورية للتلفزيون</h2>
-    <input type="text" id="subText" placeholder="اكتب أي جملة لتظهر على الشاشة..." oninput="sendUpdate()">
-  </div>
+<div class="card">
+  <h2>🎨 تخصيص المظهر لايف</h2>
+  <label>حجم الخط <span id="sizeVal">36</span></label>
+  <input type="range" id="fontSize" min="20" max="65" value="36" oninput="sendUpdate()">
 
-  <div class="card">
-    <h2>🎨 تخصيص المظهر لايف</h2>
-    <label>حجم الخط <span id="sizeVal">34</span></label>
-    <input type="range" id="fontSize" min="20" max="65" value="34" oninput="sendUpdate()">
+  <label>ارتفاع الترجمة من الأسفل <span id="posVal">60</span></label>
+  <input type="range" id="bottomPad" min="20" max="350" value="60" oninput="sendUpdate()">
 
-    <label>ارتفاع الترجمة من الأسفل <span id="posVal">60</span></label>
-    <input type="range" id="bottomPad" min="20" max="350" value="60" oninput="sendUpdate()">
+  <label>شفافية الخلفية <span id="opVal">75%</span></label>
+  <input type="range" id="bgOp" min="0" max="100" value="75" oninput="sendUpdate()">
 
-    <label>شفافية الخلفية السوداء <span id="opVal">75%</span></label>
-    <input type="range" id="bgOp" min="0" max="100" value="75" oninput="sendUpdate()">
-
-    <label>لون النص</label>
-    <div class="colors">
-      <div class="c-btn" style="background:#FFFFFF" onclick="setColor('#FFFFFF')"></div>
-      <div class="c-btn" style="background:#FACC15" onclick="setColor('#FACC15')"></div>
-      <div class="c-btn" style="background:#38BDF8" onclick="setColor('#38BDF8')"></div>
-      <div class="c-btn" style="background:#4ADE80" onclick="setColor('#4ADE80')"></div>
-    </div>
+  <label>لون النص</label>
+  <div class="colors">
+    <div class="c-btn" style="background:#FFFFFF" onclick="setColor('#FFFFFF')"></div>
+    <div class="c-btn" style="background:#FACC15" onclick="setColor('#FACC15')"></div>
+    <div class="c-btn" style="background:#38BDF8" onclick="setColor('#38BDF8')"></div>
+    <div class="c-btn" style="background:#4ADE80" onclick="setColor('#4ADE80')"></div>
   </div>
 </div>
 
 <script>
-const DB = "https://firebaseio.com";
-let pin = "";
+const URL_1122 = "https://firebaseio.com";
 let textColor = "#FFFFFF";
-
-function connectTV() {
-  pin = document.getElementById("pinInput").value.trim();
-  if(pin.length < 4) return alert("أدخل الرمز المكون من 4 أرقام");
-  document.getElementById("pairBox").style.display = "none";
-  document.getElementById("controls").style.display = "block";
-  sendUpdate();
-}
 
 function setColor(hex) { textColor = hex; sendUpdate(); }
 
-function sendUpdate() {
-  if(!pin) return;
+async function sendUpdate() {
   const fontSize = Number(document.getElementById("fontSize").value);
   const bottomPadding = Number(document.getElementById("bottomPad").value);
   const bgOpacity = Number(document.getElementById("bgOp").value) / 100;
-  const text = document.getElementById("subText").value || "تم الربط بنجاح! جرب تحريك الخط واللون من آيفونك";
+  const text = document.getElementById("subText").value || "تم الاتصال بنجاح يا زياد!";
 
   document.getElementById("sizeVal").innerText = fontSize;
   document.getElementById("posVal").innerText = bottomPadding;
   document.getElementById("opVal").innerText = Math.round(bgOpacity*100) + "%";
+  document.getElementById("status").innerText = "جاري الإرسال...";
 
-  fetch(`${DB}/sessions/${pin}.json`, {
-    method: "PATCH",
-    body: JSON.stringify({ connected: true, text, fontSize, bottomPadding, bgOpacity, textColor })
-  });
+  try {
+    const res = await fetch(URL_1122, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ connected: true, text, fontSize, bottomPadding, bgOpacity, textColor })
+    });
+    if (res.ok) {
+      document.getElementById("status").innerText = "✅ تم الإرسال للشاشة بنجاح";
+    } else {
+      document.getElementById("status").innerText = "❌ خطأ من السيرفر: " + res.status;
+    }
+  } catch (e) {
+    document.getElementById("status").innerText = "❌ تعذر الاتصال بالإنترنت";
+  }
 }
 </script>
 </body>
