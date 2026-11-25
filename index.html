@@ -67,16 +67,15 @@ async function sendUpdate() {
   try {
     const res = await fetch(URL_1122, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ connected: true, text, fontSize, bottomPadding, bgOpacity, textColor })
     });
     if (res.ok) {
       document.getElementById("status").innerText = "✅ تم الإرسال للشاشة بنجاح";
     } else {
-      document.getElementById("status").innerText = "❌ خطأ من السيرفر: " + res.status;
+      document.getElementById("status").innerText = "❌ خطأ: " + res.status;
     }
   } catch (e) {
-    document.getElementById("status").innerText = "❌ تعذر الاتصال بالإنترنت";
+    document.getElementById("status").innerText = "❌ خطأ اتصال: " + e.message;
   }
 }
 </script>
