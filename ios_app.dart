@@ -47,19 +47,17 @@ class _RemoteHomeScreenState extends State<RemoteHomeScreen> {
     if (connectedPin == null) return;
     setState(() => status = "جاري الإرسال...");
     try {
+      final data = jsonEncode({
+        "text": _textCtrl.text.isEmpty ? "تم الربط من تطبيق الآيفون بنجاح!" : _textCtrl.text,
+        "fontSize": fontSize,
+        "bottomPadding": bottomPadding,
+        "bgOpacity": bgOpacity,
+        "textColor": textColor,
+      });
+      final encoded = Uri.encodeComponent(data);
       final url = Uri.parse("https://ntfy.sh");
-      final res = await http.post(
-        url,
-        headers: {"Content-Type": "text/plain; charset=utf-8"},
-        body: jsonEncode({
-          "text": _textCtrl.text.isEmpty ? "تم الربط من تطبيق الآيفون بنجاح!" : _textCtrl.text,
-          "fontSize": fontSize,
-          "bottomPadding": bottomPadding,
-          "bgOpacity": bgOpacity,
-          "textColor": textColor,
-        }),
-      );
-      setState(() => status = res.statusCode == 200 ? "✅ تم الإرسال للشاشة بنجاح!" : "❌ خطأ: ${res.statusCode}");
+      final res = await http.get(url);
+      setState(() => status = res.statusCode == 200 ? "✅ تم الإرسال للشاشة بنجاح!" : "❌ خطأ: ${res.statusCode} - ${res.body}");
     } catch (e) {
       setState(() => status = "❌ تعذر الاتصال: $e");
     }
