@@ -50,6 +50,7 @@ class _RemoteHomeScreenState extends State<RemoteHomeScreen> {
       final url = Uri.parse("https://ntfy.sh");
       final res = await http.post(
         url,
+        headers: {"Content-Type": "text/plain; charset=utf-8"},
         body: jsonEncode({
           "text": _textCtrl.text.isEmpty ? "تم الربط من تطبيق الآيفون بنجاح!" : _textCtrl.text,
           "fontSize": fontSize,
