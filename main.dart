@@ -27,7 +27,7 @@ class TVScreen extends StatefulWidget {
 
 class _TVScreenState extends State<TVScreen> {
   late String sessionCode;
-  String subtitleText = "أدخل الرمز في آيفونك للبدء...";
+  String subtitleText = "أدخل الرمز في جهازك للبدء...";
   double fontSize = 36.0;
   double bottomPadding = 60.0;
   double bgOpacity = 0.75;
@@ -48,7 +48,8 @@ class _TVScreenState extends State<TVScreen> {
         final lines = res.body.trim().split('\n');
         final lastEvent = jsonDecode(lines.last);
         if (lastEvent["message"] != null) {
-          final data = jsonDecode(lastEvent["message"]);
+          final decodedStr = utf8.decode(base64Url.decode(lastEvent["message"]));
+          final data = jsonDecode(decodedStr);
           setState(() {
             subtitleText = data["text"] ?? subtitleText;
             fontSize = (data["fontSize"] ?? 36.0).toDouble();
