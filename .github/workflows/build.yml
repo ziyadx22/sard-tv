@@ -16,8 +16,16 @@ jobs:
           cd mysard_tv
           flutter pub add http google_fonts
           cp ../main.dart lib/main.dart
-          sed -i 's/<application/<application android:banner="@mipmap\/ic_launcher"/g' android/app/src/main/AndroidManifest.xml
-          sed -i 's/<category android:name="android.intent.category.LAUNCHER"\/>/<category android:name="android.intent.category.LAUNCHER"\/><category android:name="android.intent.category.LEANBACK_LAUNCHER"\/>/g' android/app/src/main/AndroidManifest.xml
+          python3 -c '
+          p = "android/app/src/main/AndroidManifest.xml"
+          s = open(p).read()
+          perms = """<uses-permission android:name="android.permission.INTERNET"/>
+          <uses-feature android:name="android.software.leanback" android:required="false"/>
+          <uses-feature android:name="android.hardware.touchscreen" android:required="false"/>"""
+          s = s.replace("<application", perms + "\n    <application android:banner=\"@mipmap/ic_launcher\" android:label=\"MySard TV\"")
+          s = s.replace("<category android:name=\"android.intent.category.LAUNCHER\"/>", "<category android:name=\"android.intent.category.LAUNCHER\"/><category android:name=\"android.intent.category.LEANBACK_LAUNCHER\"/>")
+          open(p, "w").write(s)
+          '
           flutter build apk --release
       - name: Publish APK
         uses: softprops/action-gh-release@v2
