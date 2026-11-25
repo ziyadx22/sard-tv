@@ -74,30 +74,31 @@ function connectTV() {
 
 function setColor(hex) { textColor = hex; sendUpdate(); }
 
-function sendUpdate() {
+async function sendUpdate() {
   if (!currentPin) return;
   const fontSize = Number(document.getElementById("fontSize").value);
   const bottomPadding = Number(document.getElementById("bottomPad").value);
   const bgOpacity = Number(document.getElementById("bgOp").value) / 100;
-  const text = document.getElementById("subText").value || "تم الربط العشوائي بنجاح يا زياد!";
+  const text = document.getElementById("subText").value || "تم الاتصال بنجاح يا زياد!";
 
   document.getElementById("sizeVal").innerText = fontSize;
   document.getElementById("posVal").innerText = bottomPadding;
   document.getElementById("opVal").innerText = Math.round(bgOpacity*100) + "%";
   document.getElementById("status").innerText = "جاري الإرسال...";
 
-  const xhr = new XMLHttpRequest();
-  xhr.open("PUT", "https://firebaseio.com" + currentPin + ".json", true);
-  xhr.onreadystatechange = function() {
-    if (xhr.readyState === 4) {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        document.getElementById("status").innerText = "✅ تم الإرسال للشاشة بنجاح!";
-      } else {
-        document.getElementById("status").innerText = "❌ خطأ اتصال (" + xhr.status + ") - جرب بيانات الجوال";
-      }
+  try {
+    const res = await fetch("https://ntfy.sh_" + currentPin, {
+      method: "POST",
+      body: JSON.stringify({ text, fontSize, bottomPadding, bgOpacity, textColor })
+    });
+    if (res.ok) {
+      document.getElementById("status").innerText = "✅ تم الإرسال للشاشة بنجاح!";
+    } else {
+      document.getElementById("status").innerText = "❌ خطأ: " + res.status;
     }
-  };
-  xhr.send(JSON.stringify({ connected: true, text, fontSize, bottomPadding, bgOpacity, textColor }));
+  } catch (e) {
+    document.getElementById("status").innerText = "❌ خطأ: " + e.message;
+  }
 }
 </script>
 </body>
