@@ -10,15 +10,16 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-      - name: Create iOS App
+      - name: Create & Build iOS IPA
         run: |
           flutter create --platforms=ios --org=com.ziyad.mysard mysard_ios
           cd mysard_ios
           flutter pub add http
           cp ../ios_app.dart lib/main.dart
-          flutter build ios --release --no-codesign
+          flutter build ios --release --no-codesign --config-only
+          xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -configuration Release -sdk iphoneos -archivePath build/ios/Runner.xcarchive archive CODE_SIGNING_ALLOWED=NO
           mkdir -p Payload
-          cp -r build/ios/iphoneos/Runner.app Payload/
+          cp -r build/ios/Runner.xcarchive/Products/Applications/Runner.app Payload/
           zip -r MySard_iOS.ipa Payload
       - name: Publish iOS IPA
         uses: softprops/action-gh-release@v2
