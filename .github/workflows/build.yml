@@ -18,8 +18,8 @@ jobs:
           cp ../main.dart lib/main.dart
           mkdir -p android/app/src/main/res/drawable
           python3 -c "import zlib, struct; w,h=320,180; raw=b''.join(b'\x00'+b'\x0c\x1d\x36\xff'*w for _ in range(h)); chk=lambda t,d: struct.pack('!I',len(d))+t+d+struct.pack('!I',zlib.crc32(t+d)&0xffffffff); open('android/app/src/main/res/drawable/tv_banner.png','wb').write(b'\x89PNG\r\n\x1a\n'+chk(b'IHDR',struct.pack('!IIBBBBB',w,h,8,6,0,0,0))+chk(b'IDAT',zlib.compress(raw))+chk(b'IEND',b''))"
-          sed -i 's/<application/<uses-permission android:name="android.permission.INTERNET"\/><uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"\/><uses-feature android:name="android.software.leanback" android:required="false"\/><uses-feature android:name="android.hardware.touchscreen" android:required="false"\/><application android:banner="@drawable\/tv_banner" android:label="MySard TV"/g' android/app/src/main/AndroidManifest.xml
-          sed -i 's/<category android:name="android.intent.category.LAUNCHER"\/>/<category android:name="android.intent.category.LAUNCHER"\/><category android:name="android.intent.category.LEANBACK_LAUNCHER"\/>/g' android/app/src/main/AndroidManifest.xml
+          sed -i '0,/<application/{s/<application/<uses-permission android:name="android.permission.INTERNET"\/><uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"\/><uses-feature android:name="android.software.leanback" android:required="false"\/><uses-feature android:name="android.hardware.touchscreen" android:required="false"\/><application android:banner="@drawable\/tv_banner" android:label="MySard TV"/}' android/app/src/main/AndroidManifest.xml
+          sed -i '0,/<category android:name="android.intent.category.LAUNCHER"\/>/{s/<category android:name="android.intent.category.LAUNCHER"\/>/<category android:name="android.intent.category.LAUNCHER"\/><category android:name="android.intent.category.LEANBACK_LAUNCHER"\/>/}' android/app/src/main/AndroidManifest.xml
           cp ../MainActivity.kt android/app/src/main/kotlin/com/ziyad/mysard/mysard_tv/MainActivity.kt
           flutter build apk --release
       - name: Publish APK
