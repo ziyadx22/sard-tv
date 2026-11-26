@@ -9,6 +9,8 @@ workflows:
           set -e
           flutter create --platforms=ios --org=com.ziyad.mysard mysard_ios
           cd mysard_ios
+          sed -i '' 's/13.0/16.0/g' ios/Runner.xcodeproj/project.pbxproj
+          sed -i '' 's/13.0/16.0/g' ios/Flutter/AppFrameworkInfo.plist
           flutter pub add web_socket_channel mobile_scanner google_mlkit_text_recognition camera speech_to_text translator url_launcher
           cp ../ios_app.dart lib/main.dart
           /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'Camera needed for QR and OCR'" ios/Runner/Info.plist
