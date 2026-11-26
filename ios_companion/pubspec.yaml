@@ -1,0 +1,21 @@
+name: mysard_ios
+description: MySard iOS companion for live Arabic PlayStation 5 subtitles.
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  web_socket_channel: 3.0.3
+  mobile_scanner: 7.5.0
+  speech_to_text: 7.5.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

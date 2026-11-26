@@ -1,0 +1,19 @@
+name: mysard_tv
+description: MySard PlayStation 5 Arabic subtitle overlay for Google TV and TCL.
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  qr_flutter: 4.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

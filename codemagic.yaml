@@ -1,28 +1,67 @@
 workflows:
-  ios-ipa-build:
-    name: Build MySard iOS IPA
-    max_build_duration: 20
+  mysard-ios:
+    name: MySard iOS
+    max_build_duration: 60
     instance_type: mac_mini_m2
+    working_directory: ios_companion
+    environment:
+      flutter: stable
+      xcode: latest
     scripts:
-      - name: Prepare & Build Unsigned IPA
+      - name: Scaffold iOS runner without touching Dart sources
         script: |
+          set -euo pipefail
+          cp pubspec.yaml /tmp/mysard-pubspec.yaml
+          cp -a lib /tmp/mysard-lib
+          flutter create --org com.mysard --project-name mysard_ios --platforms ios .
+          cp /tmp/mysard-pubspec.yaml pubspec.yaml
+          rm -rf lib
+          cp -a /tmp/mysard-lib lib
+          PLIST="ios/Runner/Info.plist"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName MySard" "$PLIST" || /usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string MySard" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleName MySard" "$PLIST" || true
+          /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string مسح رمز الاقتران يربط الآيفون بتلفزيون MySard." "$PLIST" || /usr/libexec/PlistBuddy -c "Set :NSCameraUsageDescription مسح رمز الاقتران يربط الآيفون بتلفزيون MySard." "$PLIST"
+          /usr/libexec/PlistBuddy -c "Add :NSMicrophoneUsageDescription string الميكروفون يلتقط الكلام لترجمته عربياً على شاشة البلايستيشن." "$PLIST" || /usr/libexec/PlistBuddy -c "Set :NSMicrophoneUsageDescription الميكروفون يلتقط الكلام لترجمته عربياً على شاشة البلايستيشن." "$PLIST"
+          /usr/libexec/PlistBuddy -c "Add :NSSpeechRecognitionUsageDescription string التعرف على الكلام يحوّل جمل اللعب إلى ترجمة عربية مباشرة." "$PLIST" || /usr/libexec/PlistBuddy -c "Set :NSSpeechRecognitionUsageDescription التعرف على الكلام يحوّل جمل اللعب إلى ترجمة عربية مباشرة." "$PLIST"
+          /usr/libexec/PlistBuddy -c "Add :UIBackgroundModes array" "$PLIST" || true
+          /usr/libexec/PlistBuddy -c "Add :UIBackgroundModes:0 string audio" "$PLIST" || true
+          sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.][0-9.]*/IPHONEOS_DEPLOYMENT_TARGET = 15.0/g' ios/Runner.xcodeproj/project.pbxproj || true
+          if [ -f ios/Podfile ]; then
+            sed -i '' "s/platform :ios, '[0-9.]*'/platform :ios, '15.0'/" ios/Podfile || true
+          fi
+      - name: Resolve packages
+        script: flutter pub get
+      - name: Build unsigned MySard_iOS.ipa
+        script: |
+          set -euo pipefail
+          mkdir -p build/ios/ipa
+          set +e
+          flutter build ipa --release --no-codesign
           set -e
-          flutter config --enable-swift-package-manager
-          flutter create --platforms=ios --org=com.ziyad.mysard mysard_ios
-          cd mysard_ios
-          sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = 13.0;/IPHONEOS_DEPLOYMENT_TARGET = 15.5;/g' ios/Runner.xcodeproj/project.pbxproj
-          sed -i '' 's/13.0/15.5/g' ios/Flutter/AppFrameworkInfo.plist
-          flutter pub add web_socket_channel mobile_scanner google_mlkit_text_recognition camera speech_to_text translator url_launcher
-          cp ../ios_app.dart lib/main.dart
-          /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'Camera needed for QR and OCR'" ios/Runner/Info.plist
-          /usr/libexec/PlistBuddy -c "Add :NSMicrophoneUsageDescription string 'Microphone needed for AI translation'" ios/Runner/Info.plist
-          /usr/libexec/PlistBuddy -c "Add :NSSpeechRecognitionUsageDescription string 'Speech recognition needed for live translation'" ios/Runner/Info.plist
-          /usr/libexec/PlistBuddy -c "Add :LSApplicationQueriesSchemes array" ios/Runner/Info.plist
-          /usr/libexec/PlistBuddy -c "Add :LSApplicationQueriesSchemes:0 string 'psremoteplay'" ios/Runner/Info.plist
-          flutter build ios --release --no-codesign --dart-define=FLUTTER_BUILD_MODE=release
-          mkdir -p ../Payload
-          cp -r build/ios/iphoneos/Runner.app ../Payload/
-          cd ..
-          zip -r MySard_iOS.ipa Payload
+          IPA="$(find build/ios -name '*.ipa' ! -name 'MySard_iOS.ipa' | head -n 1 || true)"
+          if [ -z "${IPA}" ]; then
+            flutter build ios --release --no-codesign
+            APP="$(find build/ios -type d -name 'Runner.app' | head -n 1)"
+            test -n "$APP"
+            rm -rf /tmp/mysard-payload
+            mkdir -p /tmp/mysard-payload/Payload
+            cp -R "$APP" /tmp/mysard-payload/Payload/
+            OUT="$(pwd)/build/ios/ipa/MySard_iOS.ipa"
+            rm -f "$OUT"
+            (cd /tmp/mysard-payload && zip -qry "$OUT" Payload)
+          else
+            cp "$IPA" "$(pwd)/build/ios/ipa/MySard_iOS.ipa"
+          fi
+          test -f build/ios/ipa/MySard_iOS.ipa
+      - name: Confirm dependency lock
+        script: |
+          test -f pubspec.lock
+          flutter pub deps --style=compact
     artifacts:
-      - MySard_iOS.ipa
+      - build/ios/ipa/MySard_iOS.ipa
+    publishing:
+      email:
+        recipients: []
+        notify:
+          success: false
+          failure: false
