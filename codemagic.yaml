@@ -7,10 +7,9 @@ workflows:
       - name: Prepare & Build Unsigned IPA
         script: |
           set -e
+          flutter config --no-enable-swift-package-manager
           flutter create --platforms=ios --org=com.ziyad.mysard mysard_ios
           cd mysard_ios
-          sed -i '' 's/13.0/16.0/g' ios/Runner.xcodeproj/project.pbxproj
-          sed -i '' 's/13.0/16.0/g' ios/Flutter/AppFrameworkInfo.plist
           flutter pub add web_socket_channel mobile_scanner google_mlkit_text_recognition camera speech_to_text translator url_launcher
           cp ../ios_app.dart lib/main.dart
           /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'Camera needed for QR and OCR'" ios/Runner/Info.plist
@@ -20,7 +19,9 @@ workflows:
           /usr/libexec/PlistBuddy -c "Add :LSApplicationQueriesSchemes:0 string 'psremoteplay'" ios/Runner/Info.plist
           flutter build ios --release --no-codesign --config-only
           cd ios
-          xcodebuild -project Runner.xcodeproj -scheme Runner -configuration Release -sdk iphoneos build CODE_SIGN_IDENTITY="" CODE_SIGN_REQUIRED=NO CODE_SIGN_ALLOWED=NO CONFIGURATION_BUILD_DIR=build_out
+          sed -i '' "s/# platform :ios, '13.0'/platform :ios, '15.5'/g" Podfile
+          pod install
+          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -sdk iphoneos build CODE_SIGN_IDENTITY="" CODE_SIGN_REQUIRED=NO CODE_SIGN_ALLOWED=NO IPHONEOS_DEPLOYMENT_TARGET=15.5 CONFIGURATION_BUILD_DIR=build_out
           mkdir -p ../../Payload
           cp -r build_out/Runner.app ../../Payload/
           cd ../..
