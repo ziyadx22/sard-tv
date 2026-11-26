@@ -18,10 +18,12 @@ workflows:
           /usr/libexec/PlistBuddy -c "Add :NSSpeechRecognitionUsageDescription string 'Speech recognition needed for live translation'" ios/Runner/Info.plist
           /usr/libexec/PlistBuddy -c "Add :LSApplicationQueriesSchemes array" ios/Runner/Info.plist
           /usr/libexec/PlistBuddy -c "Add :LSApplicationQueriesSchemes:0 string 'psremoteplay'" ios/Runner/Info.plist
-          flutter build ios --release --no-codesign
-          mkdir -p ../Payload
-          cp -r build/ios/iphoneos/Runner.app ../Payload/
-          cd ..
+          flutter build ios --release --no-codesign --config-only
+          cd ios
+          xcodebuild -project Runner.xcodeproj -scheme Runner -configuration Release -sdk iphoneos build CODE_SIGN_IDENTITY="" CODE_SIGN_REQUIRED=NO CODE_SIGN_ALLOWED=NO CONFIGURATION_BUILD_DIR=build_out
+          mkdir -p ../../Payload
+          cp -r build_out/Runner.app ../../Payload/
+          cd ../..
           zip -r MySard_iOS.ipa Payload
     artifacts:
       - MySard_iOS.ipa
