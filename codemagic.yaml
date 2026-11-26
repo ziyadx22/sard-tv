@@ -11,18 +11,15 @@ workflows:
           cd mysard_ios
           flutter pub add web_socket_channel mobile_scanner google_mlkit_text_recognition camera speech_to_text translator url_launcher
           cp ../ios_app.dart lib/main.dart
-          /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'نحتاج الكاميرا لمسح باركود التلفزيون وقراءة الترجمة الإنجليزية من الشاشة'" ios/Runner/Info.plist
-          /usr/libexec/PlistBuddy -c "Add :NSMicrophoneUsageDescription string 'نحتاج المايكروفون لسماع صوت اللعبة وترجمته للتلفزيون'" ios/Runner/Info.plist
-          /usr/libexec/PlistBuddy -c "Add :NSSpeechRecognitionUsageDescription string 'نحتاج التعرف على الكلام للترجمة الفورية'" ios/Runner/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'Camera needed for QR and OCR'" ios/Runner/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :NSMicrophoneUsageDescription string 'Microphone needed for AI translation'" ios/Runner/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :NSSpeechRecognitionUsageDescription string 'Speech recognition needed for live translation'" ios/Runner/Info.plist
           /usr/libexec/PlistBuddy -c "Add :LSApplicationQueriesSchemes array" ios/Runner/Info.plist
           /usr/libexec/PlistBuddy -c "Add :LSApplicationQueriesSchemes:0 string 'psremoteplay'" ios/Runner/Info.plist
-          flutter build ios --release --no-codesign --config-only
-          cd ios
-          pod install
-          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -sdk iphoneos build CODE_SIGN_IDENTITY="" CODE_SIGN_REQUIRED=NO CODE_SIGN_ALLOWED=NO CONFIGURATION_BUILD_DIR=build_out
-          mkdir -p ../../Payload
-          cp -r build_out/Runner.app ../../Payload/
-          cd ../..
+          flutter build ios --release --no-codesign
+          mkdir -p ../Payload
+          cp -r build/ios/iphoneos/Runner.app ../Payload/
+          cd ..
           zip -r MySard_iOS.ipa Payload
     artifacts:
       - MySard_iOS.ipa
